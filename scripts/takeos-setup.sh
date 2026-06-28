@@ -28,27 +28,26 @@ EOF
 # ── Habilitar zRAM ────────────────────────────────────────────────────────
 systemctl enable systemd-zram-setup@zram0.service || true
 
-# ── Configurar GameMode para GPU integrada ────────────────────────────────
+# ── Configurar GameMode (agnostico de GPU — funciona en Intel y AMD) ──────
 mkdir -p /etc/gamemode.ini.d
 cat > /etc/gamemode.ini.d/takeos.ini << 'EOF'
 [general]
 renice = 10
 
+[cpu]
+pin_cores = yes
+
 [gpu]
 apply_gpu_optimisations = accept-responsibility
 gpu_device = 0
-amd_performance_level = high
-
-[cpu]
-pin_cores = yes
 EOF
 
 # ── Mensaje de bienvenida en terminal ────────────────────────────────────
 cat > /etc/profile.d/takeos-welcome.sh << 'EOF'
-if [ "$TERM" != "dumb" ] && command -v neofetch &> /dev/null; then
+if [ "$TERM" != "dumb" ]; then
     echo ""
     echo "  Bienvenido a TakeOS - Gaming para el hardware que tienes"
-    echo "  github.com/takebyte/takeos"
+    echo "  github.com/TakeruTK/TakeOS"
     echo ""
 fi
 EOF
