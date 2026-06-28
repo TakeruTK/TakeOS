@@ -27,6 +27,8 @@ jobs:
         uses: blue-build/github-action@v1.6
         with:
           recipe: config/recipe.yml
-          cosign_private_key: ${{ secrets.SIGNING_SECRET }}
           registry_token: ${{ github.token }}
           pr_event_number: ${{ github.event.number }}
+          # Firma deshabilitada hasta configurar cosign keys
+          # Para habilitar: agrega SIGNING_SECRET en Settings > Secrets
+          # y descomenta: cosign_private_key: ${{ secrets.SIGNING_SECRET }}
