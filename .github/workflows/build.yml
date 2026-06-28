@@ -1,0 +1,32 @@
+name: Build TakeOS
+
+on:
+  # Construye automaticamente cada dia a las 6am UTC
+  # (detecta actualizaciones de Bazzite y las incorpora)
+  schedule:
+    - cron: "0 6 * * *"
+
+  # Construye cuando hay cambios en el repo (excepto .md)
+  push:
+    paths-ignore:
+      - "**.md"
+
+  # Permite correr el build manualmente desde GitHub
+  workflow_dispatch:
+
+jobs:
+  bluebuild:
+    name: Build TakeOS Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - name: Build Custom Image
+        uses: blue-build/github-action@v1.6
+        with:
+          recipe: config/recipe.yml
+          cosign_private_key: ${{ secrets.SIGNING_SECRET }}
+          registry_token: ${{ github.token }}
+          pr_event_number: ${{ github.event.number }}

@@ -1,0 +1,43 @@
+name: takeos
+description: TakeOS - Gaming optimizado para hardware de bajo presupuesto en LatAm
+
+# Base: Bazzite con KDE Plasma (mejor rendimiento en hardware bajo)
+base-image: ghcr.io/ublue-os/bazzite
+image-version: stable
+
+modules:
+
+  # ── Paquetes del sistema ──────────────────────────────────────────────────
+  - type: rpm-ostree
+    install:
+      - zram-generator        # Compresión de RAM (crítico para 4GB)
+      - gamemode              # Optimización automática al entrar a juegos
+      - mangohud              # Overlay de rendimiento (FPS, RAM, CPU, GPU)
+      - vulkan-tools          # Herramientas Vulkan para diagnóstico
+      - mesa-demos            # Herramientas de benchmark básico
+    remove:
+      - gnome-boxes           # VM manager que no necesitamos (ahorra RAM)
+
+  # ── Archivos de configuración personalizados ──────────────────────────────
+  # Copia todo lo que está en config/files/takeos/ hacia la raíz del sistema
+  - type: files
+    files:
+      - source: takeos
+        destination: /
+
+  # ── Flatpaks preinstalados ────────────────────────────────────────────────
+  - type: flatpak
+    notify: true
+    install:
+      - system:
+          # Emulación unificada: NES → PS2, PSP, 3DS, GameCube, Wii
+          - net.retrodeck.retrodeck
+          # Bottles: correr aplicaciones/juegos de Windows
+          - com.usebottles.bottles
+          # Heroic: Epic Games Store y GOG (juegos gratuitos)
+          - com.heroicgameslauncher.hgl
+
+  # ── Script de configuración inicial ──────────────────────────────────────
+  - type: script
+    scripts:
+      - takeos-setup.sh
