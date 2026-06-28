@@ -1,17 +1,11 @@
 name: Build TakeOS
 
 on:
-  # Construye automaticamente cada dia a las 6am UTC
-  # (detecta actualizaciones de Bazzite y las incorpora)
   schedule:
     - cron: "0 6 * * *"
-
-  # Construye cuando hay cambios en el repo (excepto .md)
   push:
     paths-ignore:
       - "**.md"
-
-  # Permite correr el build manualmente desde GitHub
   workflow_dispatch:
 
 jobs:
@@ -37,6 +31,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Login a GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -44,19 +41,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Construir imagen TakeOS
-        # --privileged necesario para que rpm-ostree funcione en container build
+      - name: Construir y publicar imagen TakeOS
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          docker build \
-            --privileged \
+          docker buildx build \
+            --platform linux/amd64 \
             --tag ghcr.io/${OWNER}/takeos:latest \
             --tag ghcr.io/${OWNER}/takeos:stable \
             --file ./Containerfile \
+            --push \
             .
-
-      - name: Publicar imagen en GHCR
-        run: |
-          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          docker push ghcr.io/${OWNER}/takeos:latest
-          docker push ghcr.io/${OWNER}/takeos:stable
